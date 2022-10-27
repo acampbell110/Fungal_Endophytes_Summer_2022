@@ -147,9 +147,54 @@ dev.off()
 
 ##############################
 ## FAKE FIG NEEDED
-## cover
-dummy_1 <- seq(7,10, by = .1)
-y_1 <- 
-  
-  
-  
+
+dummy_1 <- seq(1,10, by = .1)
+y_1 <- exp(-dummy_1)
+y_2 <- exp(-1.3*dummy_1)
+y_3 <- exp(-1.6*dummy_1)
+y_4 = 8*exp(-.4*dummy_1)
+y_5 = -0.1*exp(.4*dummy_1) + 5
+y_6 = sin(dummy_1)
+y_7 = sin(dummy_1 + 2)
+y_8 = dummy_1
+
+png("Coexistence_Mech.png")
+par(mar=c(3,3,2,0))
+layout(matrix(c(1,2,3,4),
+              ncol = 2, nrow = 2, byrow = T), heights = c(1,1,1,1)) 
+## Storage Effect
+plot(dummy_1,y_1,ylim = c(0,.3), type = "l", lwd = 2, col = "red", xlim = c(1,10), 
+     main = "a)                                                                     ",
+     xlab = "", ylab = "")
+lines(dummy_1,y_2, lwd = 2, col = "orange")
+lines(dummy_1,y_3, lwd = 2, col = "gold")
+legend("topright",legend = c("strong E","med. E","weak E"), fill = c("red","orange","gold"))
+title(ylab="Fitness", line=1.8, cex.lab=1.2)
+title(xlab = "Effects of Competition", line = 1.8, cex.lab = 1.2)
+title(main = "a)                                           ")
+## Spatial Relative Non-linearity
+plot(dummy_1,y_5, type = "l", ylim = c(0,6), col = "deeppink", lwd = 2,
+     main = "b)                                                                    ",
+     xlab = "", ylab = "")
+lines(dummy_1, y_4, col = "darkorchid", lwd = 2)
+legend("topright",legend = c("species 1","species 2"),fill = c("deeppink","darkorchid"))
+title(ylab="Fitness", line=1.8, cex.lab=1.2)
+title(xlab = "Effects of Competition", line = 1.8, cex.lab = 1.2)
+title(main = "b)                                           ")
+## non univorm and non-linear outcomes
+plot(dummy_1,y_6, type = "l", lwd = 2, col = "deeppink", ylim = c(-1,1.5),xlim = c(1,10),
+     main = "c)                                                                   ",
+     xlab = "", ylab = "")
+lines(dummy_1,y_7, col = "darkorchid", lwd = 2)
+legend("topright",legend = c("species 1","species 2"),fill = c("deeppink","darkorchid"))
+title(ylab="Fitness", line=1.8, cex.lab=1.2)
+title(xlab = "Effects of Competition", line = 1.8, cex.lab = 1.2)
+title(main = "c)                                           ")
+## Covariance of Relative Density and and rate of increase
+plot(dummy_1,y_8, lwd = 2, col = "cyan", type = "l",
+     main = "d)                                                                  ",
+     xlab = "", ylab = "")
+title(ylab="Fitness", line=1.8, cex.lab=1.2)
+title(xlab = "Density", line = 1.8, cex.lab = 1.2)
+title(main = "d)                                           ")
+dev.off()
