@@ -12,11 +12,12 @@ library(ggpubr)
 ## set up important function
 invlogit <- function(x){exp(x)/(1+exp(x))}
 ## Read data in
+data_2022 <- read_excel("Huntsville ELVI Survey.xlsx", sheet = 3)
 data_2021 <- read_excel("Summer 2021 Seed Surveys.xlsx", sheet = 1)
 data_2021$Site <- as.factor(data_2021$Site)
 head(data_2021)
 ## Create a separate subset for each site
-hunt_2021 <- read_excel("Huntsville ELVI Survey.xlsx", sheet = 3)
+hunt_2021 <- subset(data_2021, data_2021$Site == "HUNT 21-1")
 wall_2021 <- subset(data_2021, data_2021$Site == "WALL 21-3")
 faye_2021 <- subset(data_2021, data_2021$Site == "FAYE21-2")
 ##################### Create All Models to Select From #####################################
@@ -99,7 +100,25 @@ aictab(list(mod4,mod12,mod13,mod18,mod19,mod26,mod27))
 ################################# ANALYSIS ####################################################
 ## In all models, the inclusion of vwc appears to be the most important. The soil water content
 ## appears to be the best predictor of endophyte status. 
-
+## Now I will test if there is a significant difference in the mean vwc of each E status
+######## Huntsville 2022
+## 
+a <- subset(data_2022, data_2022$`peel lib.` == 1)
+b <- subset(data_2022, data_2022$`peel lib.` == 0)
+t.test(a$soil_moist,b$soil_moist, alternative = "less")
+######## Hunstville 2021
+##
+a <- subset(hunt_2021, hunt_2021$Agrin_Endo == 1)
+b <- subset(hunt_2021, hunt_2021$Agrin_Endo == 0)
+t.test(a$vwc,b$vwc, alternative = "less")
+######## Waller 2021
+a <- subset(wall_2021, wall_2021$Agrin_Endo == 1)
+b <- subset(wall_2021, wall_2021$Agrin_Endo == 0)
+t.test(a$vwc,b$vwc, alternative = "less")
+######## Faye 2021
+a <- subset(faye_2021, faye_2021$Agrin_Endo == 1)
+b <- subset(faye_2021, faye_2021$Agrin_Endo == 0)
+t.test(a$vwc,b$vwc, alternative = "less")
 ##################### Visualize All Best Models #################################################
 ## Create colors
 huntcol <- "deeppink2"
@@ -107,24 +126,45 @@ wallcol <- "darkorchid2"
 fayecol <- "aquamarine2"
 anycol <- "deepskyblue2"
 ## ggplot version (needs to be remade because the error bars go beyond 0)
-a <- ggplot(data = hunt_2021,aes(x = soil_moist, y = `peel lib.`)) + 
+a <- ggplot(data = hunt_2021,aes(x = vwc, y = Agrin_Endo)) + 
   geom_point() +
   stat_smooth(method = "lm", col = huntcol,level = 0.5) + 
   theme_classic() + 
-  labs(x = "") + 
+  labs(x = "") +   labs(y = "") + 
   ylim(0,1) 
-b <- ggplot(data = wall_2021,aes(x = vwc, y = Endo_L)) + 
+d <- ggplot(data = data_2022,aes(x = soil_moist, y = `peel lib.`)) + 
+  geom_point() +
+  stat_smooth(method = "lm", col = anycol,level = 0.5) + 
+  theme_classic() + 
+  labs(x = "") +   labs(y = "") + 
+  ylim(0,1) 
+b <- ggplot(data = wall_2021,aes(x = vwc, y = Agrin_Endo)) + 
   geom_point() +
   stat_smooth(method = "lm", col = wallcol,level = 0.5) + 
-  theme_classic()
-c <- ggplot(data = faye_2021,aes(x = vwc, y = Endo_L)) + 
+  labs(x = "") +   labs(y = "") + 
+  theme_classic() + 
+  ylim(0,1) 
+c <- ggplot(data = faye_2021,aes(x = vwc, y = Agrin_Endo)) + 
   geom_point() +
   stat_smooth(method = "lm", col = fayecol,level = 0.5) + 
-  theme_classic()
-png("Soil_Water_Content1.png")
-ggarrange(a,b,c,
-          labels = c("a)","b)","c)"),
-          ncol = 3, nrow = 1)
+  labs(x = "",y = "")  + 
+  theme_classic() + 
+  ylim(0,1) 
+e <- ggplot() + geom_text(aes(x=0, y=0, label = "Endophyte Status"), 
+               parse = TRUE, size = 6, angle = 90, vjust = 1.4) +
+  theme_void()
+f <- ggplot() + geom_text(aes(x=0, y=0, label = " "), 
+               parse = TRUE, size = 6, hjust = -1) +
+  theme_void()
+g <- ggplot() + geom_text(aes(x=0, y=0, label = "Soil"), 
+                            parse = TRUE, size = 6, vjust = -.8) +
+  theme_void()
+group <- ggarrange(a,b,c,d,
+                   labels = c("a)","b)","c)","d)"),
+                   ncol = 4, nrow = 1)
+png("Soil_Water_Content2.png")
+annotate_figure(group,left = textGrob("Endophyte Status",rot = 90, vjust = 1.4, gp = gpar(cex = 1.5)),
+                bottom = textGrob("Soil Water Content", vjust = -.2, gp = gpar(cex = 1.5)))
 dev.off()
 
 png("Other Envi Variables.png")
@@ -159,42 +199,26 @@ y_7 = sin(dummy_1 + 2)
 y_8 = dummy_1
 
 png("Coexistence_Mech.png")
-par(mar=c(3,3,2,0))
-layout(matrix(c(1,2,3,4),
-              ncol = 2, nrow = 2, byrow = T), heights = c(1,1,1,1)) 
+par(mar=c(3,3,2,2))
+layout(matrix(c(1,2),
+              ncol = 2, nrow = 1, byrow = T), heights = c(1)) 
 ## Storage Effect
-plot(dummy_1,y_1,ylim = c(0,.3), type = "l", lwd = 2, col = "red", xlim = c(1,10), 
-     main = "a)                                                                     ",
+plot(dummy_1,y_1,ylim = c(0,.3), type = "l", lwd = 3, col = "red", xlim = c(1,10), 
+     main = "                                                                      ",
      xlab = "", ylab = "")
-lines(dummy_1,y_2, lwd = 2, col = "orange")
-lines(dummy_1,y_3, lwd = 2, col = "gold")
+lines(dummy_1,y_2, lwd = 3, col = "orange")
+lines(dummy_1,y_3, lwd = 3, col = "gold")
 legend("topright",legend = c("strong E","med. E","weak E"), fill = c("red","orange","gold"))
 title(ylab="Fitness", line=1.8, cex.lab=1.2)
 title(xlab = "Effects of Competition", line = 1.8, cex.lab = 1.2)
 title(main = "a)                                           ")
 ## Spatial Relative Non-linearity
-plot(dummy_1,y_5, type = "l", ylim = c(0,6), col = "deeppink", lwd = 2,
+plot(dummy_1,y_5, type = "l", ylim = c(0,6), col = "deeppink", lwd = 3,
      main = "b)                                                                    ",
      xlab = "", ylab = "")
-lines(dummy_1, y_4, col = "darkorchid", lwd = 2)
+lines(dummy_1, y_4, col = "darkorchid", lwd = 3)
 legend("topright",legend = c("species 1","species 2"),fill = c("deeppink","darkorchid"))
 title(ylab="Fitness", line=1.8, cex.lab=1.2)
 title(xlab = "Effects of Competition", line = 1.8, cex.lab = 1.2)
-title(main = "b)                                           ")
-## non univorm and non-linear outcomes
-plot(dummy_1,y_6, type = "l", lwd = 2, col = "deeppink", ylim = c(-1,1.5),xlim = c(1,10),
-     main = "c)                                                                   ",
-     xlab = "", ylab = "")
-lines(dummy_1,y_7, col = "darkorchid", lwd = 2)
-legend("topright",legend = c("species 1","species 2"),fill = c("deeppink","darkorchid"))
-title(ylab="Fitness", line=1.8, cex.lab=1.2)
-title(xlab = "Effects of Competition", line = 1.8, cex.lab = 1.2)
-title(main = "c)                                           ")
-## Covariance of Relative Density and and rate of increase
-plot(dummy_1,y_8, lwd = 2, col = "cyan", type = "l",
-     main = "d)                                                                  ",
-     xlab = "", ylab = "")
-title(ylab="Fitness", line=1.8, cex.lab=1.2)
-title(xlab = "Density", line = 1.8, cex.lab = 1.2)
-title(main = "d)                                           ")
+title(main = "b)                                           ")                                         ")
 dev.off()
