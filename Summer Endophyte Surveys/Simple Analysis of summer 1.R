@@ -106,11 +106,6 @@ aictab(list(mod4,mod12,mod13,mod18,mod19,mod26,mod27))
 a <- subset(data_2022, data_2022$`peel lib.` == 1)
 b <- subset(data_2022, data_2022$`peel lib.` == 0)
 t.test(a$soil_moist,b$soil_moist, alternative = "less")
-######## Hunstville 2021
-##
-a <- subset(hunt_2021, hunt_2021$Agrin_Endo == 1)
-b <- subset(hunt_2021, hunt_2021$Agrin_Endo == 0)
-t.test(a$vwc,b$vwc, alternative = "less")
 ######## Waller 2021
 a <- subset(wall_2021, wall_2021$Agrin_Endo == 1)
 b <- subset(wall_2021, wall_2021$Agrin_Endo == 0)
@@ -126,15 +121,9 @@ wallcol <- "darkorchid2"
 fayecol <- "aquamarine2"
 anycol <- "deepskyblue2"
 ## ggplot version (needs to be remade because the error bars go beyond 0)
-a <- ggplot(data = hunt_2021,aes(x = vwc, y = Agrin_Endo)) + 
-  geom_point() +
-  stat_smooth(method = "lm", col = huntcol,level = 0.5) + 
-  theme_classic() + 
-  labs(x = "") +   labs(y = "") + 
-  ylim(0,1) 
 d <- ggplot(data = data_2022,aes(x = soil_moist, y = `peel lib.`)) + 
   geom_point() +
-  stat_smooth(method = "lm", col = anycol,level = 0.5) + 
+  stat_smooth(method = "lm", col = huntcol,level = 0.5) + 
   theme_classic() + 
   labs(x = "") +   labs(y = "") + 
   ylim(0,1) 
@@ -159,9 +148,9 @@ f <- ggplot() + geom_text(aes(x=0, y=0, label = " "),
 g <- ggplot() + geom_text(aes(x=0, y=0, label = "Soil"), 
                             parse = TRUE, size = 6, vjust = -.8) +
   theme_void()
-group <- ggarrange(a,b,c,d,
-                   labels = c("a)","b)","c)","d)"),
-                   ncol = 4, nrow = 1)
+group <- ggarrange(b,c,d,
+                   labels = c("a)","b)","c)"),
+                   ncol = 3, nrow = 1)
 png("Soil_Water_Content2.png")
 annotate_figure(group,left = textGrob("Endophyte Status",rot = 90, vjust = 1.4, gp = gpar(cex = 1.5)),
                 bottom = textGrob("Soil Water Content", vjust = -.2, gp = gpar(cex = 1.5)))
